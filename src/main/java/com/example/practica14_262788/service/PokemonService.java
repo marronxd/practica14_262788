@@ -1,29 +1,45 @@
 package com.example.practica14_262788.service;
 
+import com.example.practica14_262788.excepciones.ResourceNotFoundException;
 import com.example.practica14_262788.model.Pokemon;
 import com.example.practica14_262788.repository.IPokemonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PokemonService {
 
     @Autowired
     private IPokemonRepository pokemonRepository;
+    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
 
     public List<Pokemon> obtenerTodos() {
         return pokemonRepository.findAll();
     }
 
     public Optional<Pokemon> obtenerPorId(Long id) {
+        if(!pokemonRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Pokemon no encontrado " + id);
+        }
+
         return pokemonRepository.findById(id);
     }
 
     // Reemplaza todo (es el put)
     public Optional<Pokemon> actualizarCompleto(Long id, Pokemon detalles) {
+
+        if(!pokemonRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Pokemon no encontrado " + id);
+        }
 
         // Básicamente si lo actualiza, lo regresa, sino pues no xd
         return pokemonRepository.findById(id).map(reemplazar -> {
@@ -49,6 +65,11 @@ public class PokemonService {
 
     // Se acrtualizan partes especificas (es el patch)
     public Optional<Pokemon> actualizarParcial(Long id, Pokemon detalles) {
+
+        if(!pokemonRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Pokemon no encontrado " + id);
+        }
+
         return pokemonRepository.findById(id).map(registrado -> {
 
             if (detalles.getNombre() != null) registrado.setNombre(detalles.getNombre());
@@ -69,8 +90,9 @@ public class PokemonService {
         });
     }
 
-    public Pokemon guardar(Pokemon recurso) {
-        return pokemonRepository.save(recurso);
+    public Pokemon guardar(Pokemon pokemon) {
+        // GUARDA EL TEXTO EN LA BASE DE DATOS
+        return pokemonRepository.save(pokemon);
     }
 
     public boolean eliminar(Long id) {
@@ -78,6 +100,6 @@ public class PokemonService {
             pokemonRepository.deleteById(id);
             return  true;
         }
-        return false;
+        throw new ResourceNotFoundException("El registro no existe "+ id);
     }
 }

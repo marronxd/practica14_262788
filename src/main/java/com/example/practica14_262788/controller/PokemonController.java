@@ -2,10 +2,12 @@ package com.example.practica14_262788.controller;
 
 import com.example.practica14_262788.model.Pokemon;
 import com.example.practica14_262788.service.PokemonService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,14 +47,14 @@ public class PokemonController {
      * @return
      */
     @PostMapping
-    public ResponseEntity<Pokemon> crear(@RequestBody Pokemon pokemon){
+    public ResponseEntity<Pokemon> crear(@Valid @RequestBody Pokemon pokemon){
         Pokemon nuevoPoke = pokemonService.guardar(pokemon);
         return new ResponseEntity<>(nuevoPoke, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Pokemon> actualizarTodo(@PathVariable Long id,
-                                              @RequestBody Pokemon detalles){
+                                                  @Valid @RequestBody Pokemon detalles){
         // SE ACTUALIZA, PRIMERO SE COMPRUEBA QUE EXISTA EN LA BD CON OPTIONAL
         Optional<Pokemon> actualizado = pokemonService.actualizarCompleto(id, detalles);
 
@@ -69,7 +71,7 @@ public class PokemonController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Pokemon> actualizarAlgunasCosas(@PathVariable Long id,
-                                              @RequestBody Pokemon detalles){
+                                                          @Valid @RequestBody Pokemon detalles){
 
         // COMPRUEBA EXISTENCIA Y ACTUALIZA
         Optional<Pokemon> actualizado = pokemonService.actualizarParcial(id, detalles);
